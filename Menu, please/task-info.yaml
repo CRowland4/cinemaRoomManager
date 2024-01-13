@@ -355,5 +355,8 @@ files:
     learner_created: false
 feedback_link: https://hyperskill.org/projects/399/stages/2361/implement#comment
 check_profile: hyperskill_go
-status: Unchecked
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Sat, 13 Jan 2024 17:24:35 UTC"
 record: -1
