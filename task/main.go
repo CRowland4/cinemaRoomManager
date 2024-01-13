@@ -1,43 +1,98 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
+
+type seat struct {
+	rowNum  int
+	seatNum int
+}
 
 func main() {
-	rowCount := getRowCount()
-	seatsPerRow := getSeatsPerRow()
-	totalProfit := calculateTotalProfit(rowCount, seatsPerRow)
+	rowCount := readInteger("Enter the number of rows:")
+	seatsPerRow := readInteger("Enter the number of seats in each row:")
+	seatMatrix := createSeatMatrix(rowCount, seatsPerRow)
+	fmt.Println()
+	printCinema(seatMatrix)
 
-	fmt.Println("Total income:")
-	fmt.Printf("$%d\n", totalProfit)
+	seatSelection := getSeatSelection()
+	seatMatrix = updateSeatMatrix(seatMatrix, seatSelection)
+	printTicketPrice(rowCount, seatsPerRow, seatSelection.rowNum)
+
+	printCinema(seatMatrix)
+
 	return
 }
 
-func calculateTotalProfit(rowCount int, seatsPerRow int) (totalProfit int) {
+func printTicketPrice(rowCount, seatsPerRow, seatRow int) {
 	totalSeats := rowCount * seatsPerRow
 
-	if totalSeats <= 60 {
-		totalProfit = 10 * totalSeats
-	} else if rowCount%2 == 0 { // Even number of rows
-		totalProfit = 9 * totalSeats
-	} else { // Odd number of rows
-		frontSeatsCount := (rowCount / 2) * seatsPerRow
-		backSeatsCount := frontSeatsCount + seatsPerRow
-		totalProfit = (10 * frontSeatsCount) + (8 * backSeatsCount)
+	var ticketPrice int
+	if (totalSeats <= 60) || (seatRow <= rowCount/2) {
+		ticketPrice = 10
+	} else {
+		ticketPrice = 8
 	}
 
-	return totalProfit
+	fmt.Printf("Ticket price: $%d\n", ticketPrice)
+	fmt.Println()
+	return
 }
 
-func getRowCount() (numRows int) {
-	fmt.Println("Enter the number of rows:")
-	fmt.Scan(&numRows)
+func createSeatMatrix(rowCount, seatsPerRow int) (seatMatrix [][]string) {
+	seatMatrix = make([][]string, rowCount)
 
-	return numRows
+	for i := 0; i < rowCount; i++ {
+		seatMatrix[i] = make([]string, seatsPerRow)
+		for j := 0; j < seatsPerRow; j++ {
+			seatMatrix[i][j] = "S"
+		}
+	}
+
+	return seatMatrix
 }
 
-func getSeatsPerRow() (seatsPerRow int) {
-	fmt.Println("Enter the number of seats in each row:")
-	fmt.Scan(&seatsPerRow)
+func printCinema(seatMatrix [][]string) {
+	fmt.Println("Cinema:")
+	fmt.Print(" ")
+	for i := 1; i <= len(seatMatrix[0]); i++ {
+		fmt.Printf(" %d", i)
+	}
+	fmt.Println()
 
-	return seatsPerRow
+	for rowIndex, _ := range seatMatrix {
+		fmt.Printf("%d", rowIndex+1)
+		for _, seatStatus := range seatMatrix[rowIndex] {
+			fmt.Printf(" %s", seatStatus)
+		}
+		fmt.Println()
+	}
+	fmt.Println()
+
+	return
+}
+
+func getSeatSelection() (seatSelection seat) {
+	seatSelection = seat{
+		rowNum:  readInteger("Enter a row number:"),
+		seatNum: readInteger("Enter a seat number in that row:"),
+	}
+	fmt.Println()
+
+	return seatSelection
+}
+
+func updateSeatMatrix(seatMatrix [][]string, seatSelection seat) (updatedMatrix [][]string) {
+	updatedMatrix = seatMatrix
+	updatedMatrix[seatSelection.rowNum-1][seatSelection.seatNum-1] = "B" // The minus ones account for zero-indexing
+
+	return updatedMatrix
+}
+
+func readInteger(prompt string) (integer int) {
+	fmt.Println(prompt)
+	fmt.Scan(&integer)
+
+	return integer
 }
