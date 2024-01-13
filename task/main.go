@@ -68,8 +68,9 @@ func printCinema(seatMatrix [][]string) {
 		for _, seatStatus := range seatMatrix[rowIndex] {
 			fmt.Printf(" %s", seatStatus)
 		}
-		fmt.Println("\n ")
+		fmt.Println()
 	}
+	fmt.Println()
 
 	return
 }
