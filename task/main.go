@@ -18,12 +18,13 @@ func main() {
 	for {
 		switch userAction := readInteger("1. Show the seats\n2. Buy a ticket\n0. Exit"); userAction {
 		case 1:
+			fmt.Println()
 			printCinema(seatMatrix)
+			fmt.Println()
 		case 2:
 			fmt.Println()
-			ticket := getSeatSelection()
-			seatMatrix = updateSeatMatrix(seatMatrix, ticket)
-			printTicketPrice(seatMatrix, ticket.rowNum)
+			buyTicket(seatMatrix)
+			fmt.Println()
 		case 0:
 			return
 		}
@@ -42,7 +43,6 @@ func printTicketPrice(seatMatrix [][]string, seatRow int) {
 	}
 
 	fmt.Printf("Ticket price: $%d\n", ticketPrice)
-	fmt.Println()
 	return
 }
 
@@ -60,7 +60,6 @@ func createSeatMatrix(rowCount, seatsPerRow int) (seatMatrix [][]string) {
 }
 
 func printCinema(seatMatrix [][]string) {
-	fmt.Println()
 	fmt.Println("Cinema:")
 	fmt.Print(" ")
 	for i := 1; i <= len(seatMatrix[0]); i++ {
@@ -76,7 +75,14 @@ func printCinema(seatMatrix [][]string) {
 		fmt.Println()
 	}
 
-	fmt.Println()
+	return
+}
+
+func buyTicket(seatMatrix [][]string) {
+	ticket := getSeatSelection()
+	seatMatrix = updateSeatMatrix(seatMatrix, ticket)
+	printTicketPrice(seatMatrix, ticket.rowNum)
+
 	return
 }
 
