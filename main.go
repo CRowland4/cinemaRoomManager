@@ -2,6 +2,14 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+)
+
+const (
+	Reset  = "\033[0m"
+	Red    = "\033[31m"
+	Yellow = "\033[33m"
+	Blue   = "\033[34m"
 )
 
 type seat struct {
@@ -10,9 +18,8 @@ type seat struct {
 }
 
 func main() {
-	rowCount := readInteger("Enter the number of rows:")
-	seatsPerRow := readInteger("Enter the number of seats in each row:")
-	fmt.Println()
+	rowCount := getRowCount()
+	seatsPerRow := getSeatCount()
 	seatMatrix := createSeatMatrix(rowCount, seatsPerRow)
 
 	for {
@@ -25,6 +32,36 @@ func main() {
 			printStatistics(seatMatrix)
 		case 0:
 			return
+		default:
+			fmt.Println(Red + "\nPlease enter an integer representing one of the options presented." + Reset)
+		}
+	}
+}
+
+func getRowCount() (rowCount int) {
+	for {
+		rowCount = readInteger("Enter the number of rows:")
+		if rowCount <= 0 {
+			fmt.Println(Red + "\nTheater must have at least 1 row!" + Reset)
+		} else if rowCount >= 100 {
+			fmt.Println(Red + "\nTheater rows can't exceed 99!" + Reset)
+		} else {
+			fmt.Println()
+			return rowCount
+		}
+	}
+}
+
+func getSeatCount() (rowCount int) {
+	for {
+		rowCount = readInteger("Enter the number of seats in each row:")
+		if rowCount <= 0 {
+			fmt.Println(Red + "\nRows must have at least 1 seat!" + Reset)
+		} else if rowCount >= 100 {
+			fmt.Println(Red + "\nSeats per row can't exceed 99!" + Reset)
+		} else {
+			fmt.Println()
+			return rowCount
 		}
 	}
 }
@@ -33,10 +70,10 @@ func printStatistics(seatMatrix [][]string) {
 	purchasedCount := countPurchasedTickets(seatMatrix)
 	purchasedTicketPercentage := (float64(purchasedCount) / float64(len(seatMatrix)*len(seatMatrix[0]))) * 100.0
 
-	fmt.Printf("\nNumber of purchased tickets: %d\n", purchasedCount)
-	fmt.Printf("Percentage: %.2f%%\n", purchasedTicketPercentage)
-	fmt.Printf("Current income: $%d\n", getCurrentIncome(seatMatrix))
-	fmt.Printf("Total income: $%d\n\n", getTotalIncome(seatMatrix))
+	fmt.Printf(Yellow + "\nNumber of purchased tickets: " + Reset + "%d\n", purchasedCount)
+	fmt.Printf(Yellow + "Percentage: " + Reset + "%.2f%%\n", purchasedTicketPercentage)
+	fmt.Printf(Yellow + "Current income: "+ Reset + "$%d\n", getCurrentIncome(seatMatrix))
+	fmt.Printf(Yellow + "Potential income for full theater: " + Reset + "$%d\n\n", getTotalIncome(seatMatrix))
 
 	return
 }
@@ -107,16 +144,26 @@ func createSeatMatrix(rowCount, seatsPerRow int) (seatMatrix [][]string) {
 }
 
 func printCinema(seatMatrix [][]string) {
-	fmt.Print("\nCinema:\n ")
+	fmt.Print("\nCinema:\n   ")
 	for i := 1; i <= len(seatMatrix[0]); i++ {
-		fmt.Printf(" %d", i)
+		if i < 10 {
+			fmt.Printf(" %d ", i)
+		} else {
+			fmt.Printf(" %d", i)
+		}
 	}
 	fmt.Println()
 
 	for rowIndex := range seatMatrix {
-		fmt.Printf("%d", rowIndex+1)
+		if rowIndex < 9 {fmt.Printf("%d  ", rowIndex+1)
+		}else {fmt.Printf("%d ", rowIndex+1)}
+
 		for _, seatStatus := range seatMatrix[rowIndex] {
-			fmt.Printf(" %s", seatStatus)
+			if seatStatus == "S" {
+				fmt.Printf(Blue + " %s " + Reset, seatStatus)
+			} else {
+				fmt.Printf(Red + " %s " + Reset, seatStatus)
+			}
 		}
 		fmt.Println()
 	}
@@ -137,29 +184,18 @@ func getTicket(seatMatrix [][]string) (ticket seat) {
 	fmt.Println()
 	for {
 		ticket.rowNum = readInteger("Enter a row number:")
+		if ticket.rowNum <= 0 || ticket.rowNum > len(seatMatrix) {fmt.Println(Red + "\nInvalid row number!" + Reset)
+		} else{ break }
+	}
+
+	fmt.Println()
+	for {
 		ticket.seatNum = readInteger("Enter a seat number in that row:")
+		if ticket.seatNum <= 0 || ticket.seatNum > len(seatMatrix[0]) {fmt.Println(Red + "\nInvalid seat number!" + Reset)
+		} else{ break }
+	} 
 
-		if isTicketSelectionValid(seatMatrix, ticket) {
-			return ticket
-		}
-	}
-}
-
-func isTicketSelectionValid(seatMatrix [][]string, ticket seat) (isValid bool) {
-	isBadRow := (ticket.rowNum <= 0) || (ticket.rowNum > len(seatMatrix))
-	isBadSeat := (ticket.seatNum <= 0) || (ticket.seatNum > len(seatMatrix[0]))
-	if isBadRow || isBadSeat {
-		fmt.Print("\nWrong input!\n\n")
-		return false
-	}
-
-	isSeatTaken := seatMatrix[ticket.rowNum-1][ticket.seatNum-1] == "B" // The minus ones account for zero-indexing
-	if isSeatTaken {
-		fmt.Print("\nThat ticket has already been purchased!\n\n")
-		return false
-	}
-
-	return true
+	return ticket
 }
 
 func updateSeatMatrix(seatMatrix [][]string, ticket seat) (updatedMatrix [][]string) {
@@ -170,8 +206,16 @@ func updateSeatMatrix(seatMatrix [][]string, ticket seat) (updatedMatrix [][]str
 }
 
 func readInteger(prompt string) (integer int) {
-	fmt.Println(prompt)
-	_, _ = fmt.Scan(&integer)
-
+	var userInput string
+	for {
+		fmt.Println(prompt)
+		_, _ = fmt.Scan(&userInput)
+		integer, err := strconv.Atoi(userInput)
+		if err == nil {
+			return integer
+		} else {
+			fmt.Println(Red + "\nInput must be an integer!" + Reset)
+		}
+	}
 	return integer
 }
